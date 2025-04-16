@@ -7,26 +7,19 @@ const NOTIFICATION_INTERVAL = 5000;
 const NOTIFICATION_INITIAL_DELAY = 2000;
 const SOUND_VOLUME = 0.3;
 
-// Initialize sound for both mobile and desktop
-document.addEventListener('touchstart', initializeSound, { once: true });
-document.addEventListener('click', initializeSound, { once: true });
+// Preload sound immediately
+const sound = document.getElementById('notificationSound');
+if (sound) {
+    sound.load();
+    sound.volume = SOUND_VOLUME;
+    sound.preload = 'auto';
+}
 
-/**
- * Initialize sound system
- * @returns {Promise<void>}
- */
-async function initializeSound() {
+// Enable sound on first user interaction (required by browsers)
+const enableSound = async () => {
     try {
-        const sound = document.getElementById('notificationSound');
-        if (!sound) {
-            console.error('Notification sound element not found');
-            return;
-        }
-
-        sound.load();
-        sound.volume = SOUND_VOLUME;
+        if (!sound) return;
         
-        // Play and immediately pause to enable sound
         await sound.play();
         sound.pause();
         sound.currentTime = 0;
@@ -34,7 +27,11 @@ async function initializeSound() {
     } catch (error) {
         console.error('Sound initialization failed:', error);
     }
-}
+};
+
+// Initialize sound for both mobile and desktop
+document.addEventListener('touchstart', enableSound, { once: true });
+document.addEventListener('click', enableSound, { once: true });
 /**
  * Countdown Timer Configuration
  */
@@ -106,8 +103,7 @@ const fomoData = [
 
 const elements = {
     notification: document.getElementById('fomo-notification'),
-    message: document.getElementById('fomo-message'),
-    sound: document.getElementById('notificationSound')
+    message: document.getElementById('fomo-message')
 };
 
 let currentIndex = 0;
@@ -125,10 +121,10 @@ function showNotification() {
     elements.notification.classList.remove('hidden');
     
     // Play notification sound if enabled
-    if (soundEnabled && elements.sound) {
+    if (soundEnabled && sound) {
         try {
-            elements.sound.currentTime = 0;
-            elements.sound.play().catch(error => {
+            sound.currentTime = 0;
+            sound.play().catch(error => {
                 console.error('Sound playback failed:', error);
             });
         } catch (error) {
