@@ -5,14 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terima Kasih - Firman 8</title>
     
-    <!-- Google Ads Conversion Tracking -->
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16923029164"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-
         gtag('config', 'AW-16923029164');
+    </script>
+
+    <!-- Event snippet for Contact conversion page -->
+    <script>
+        gtag('event', 'conversion', {'send_to': 'AW-16923029164/eWC3CKmntrkaEKzdw4U_'});
     </script>
     
     <style>
@@ -40,7 +44,7 @@
     </div>
     <script>
         setTimeout(function() {
-            window.location.href = "https://wa.me/08117181122";
+            window.location.href = "https://api.whatsapp.com/send/?phone=628117181122&text&type=phone_number&app_absent=0";
         }, 2000);
     </script>
 </body>
