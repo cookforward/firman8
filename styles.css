@@ -97,6 +97,26 @@ section h2 {
     transform: scale(1.25);
 }
 
+/* Countdown Section */
+.countdown {
+    text-align: center;
+    background: #fff3e0;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+#timer {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #ff5722;
+    display: block;
+    margin: 10px 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: 'Poppins', sans-serif;
+}
+
 /* Promo Section */
 .promo {
     background: #f9f9f9;

@@ -5,14 +5,15 @@ let soundEnabled = false;
 const NOTIFICATION_DURATION = 4000;
 const NOTIFICATION_INTERVAL = 5000;
 const NOTIFICATION_INITIAL_DELAY = 2000;
-const SOUND_VOLUME = 0.3;
+const SOUND_VOLUME = 0.5;
 
-// Preload sound immediately
+// Initialize sound
 const sound = document.getElementById('notificationSound');
 if (sound) {
+    // Force load the audio
     sound.load();
     sound.volume = SOUND_VOLUME;
-    sound.preload = 'auto';
+    sound.muted = false;
 }
 
 // Enable sound on first user interaction (required by browsers)
@@ -20,6 +21,9 @@ const enableSound = async () => {
     try {
         if (!sound) return;
         
+        // Unmute and play a silent part
+        sound.muted = false;
+        sound.volume = SOUND_VOLUME;
         await sound.play();
         sound.pause();
         sound.currentTime = 0;
@@ -30,8 +34,9 @@ const enableSound = async () => {
 };
 
 // Initialize sound for both mobile and desktop
-document.addEventListener('touchstart', enableSound, { once: true });
-document.addEventListener('click', enableSound, { once: true });
+['touchstart', 'click'].forEach(event => {
+    document.addEventListener(event, enableSound, { once: true });
+});
 /**
  * Countdown Timer Configuration
  */
