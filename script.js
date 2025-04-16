@@ -1,26 +1,86 @@
-// Countdown Timer
-const endTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 hours from now
+/**
+ * Sound and notification configuration
+ */
+let soundEnabled = false;
+const NOTIFICATION_DURATION = 4000;
+const NOTIFICATION_INTERVAL = 5000;
+const NOTIFICATION_INITIAL_DELAY = 2000;
+const SOUND_VOLUME = 0.3;
+
+// Initialize sound for both mobile and desktop
+document.addEventListener('touchstart', initializeSound, { once: true });
+document.addEventListener('click', initializeSound, { once: true });
+
+/**
+ * Initialize sound system
+ * @returns {Promise<void>}
+ */
+async function initializeSound() {
+    try {
+        const sound = document.getElementById('notificationSound');
+        if (!sound) {
+            console.error('Notification sound element not found');
+            return;
+        }
+
+        sound.load();
+        sound.volume = SOUND_VOLUME;
+        
+        // Play and immediately pause to enable sound
+        await sound.play();
+        sound.pause();
+        sound.currentTime = 0;
+        soundEnabled = true;
+    } catch (error) {
+        console.error('Sound initialization failed:', error);
+    }
+}
+/**
+ * Countdown Timer Configuration
+ */
+const ONE_DAY = 24 * 60 * 60 * 1000;
+const ONE_HOUR = 60 * 60 * 1000;
+const ONE_MINUTE = 60 * 1000;
+const ONE_SECOND = 1000;
+
+const endTime = new Date().getTime() + ONE_DAY; // 24 hours from now
 const timerElement = document.getElementById('timer');
 
+/**
+ * Updates the countdown timer display
+ */
 function updateTimer() {
+    if (!timerElement) {
+        console.error('Timer element not found');
+        clearInterval(timerInterval);
+        return;
+    }
+
     const now = new Date().getTime();
     const distance = endTime - now;
-
-    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-    timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
     if (distance < 0) {
         clearInterval(timerInterval);
         timerElement.textContent = "Promo Berakhir!";
+        return;
     }
+
+    const hours = Math.floor((distance % ONE_DAY) / ONE_HOUR);
+    const minutes = Math.floor((distance % ONE_HOUR) / ONE_MINUTE);
+    const seconds = Math.floor((distance % ONE_MINUTE) / ONE_SECOND);
+
+    timerElement.textContent = [
+        hours.toString().padStart(2, '0'),
+        minutes.toString().padStart(2, '0'),
+        seconds.toString().padStart(2, '0')
+    ].join(':');
 }
 
 const timerInterval = setInterval(updateTimer, 1000);
 
-// FOMO notifications
+/**
+ * FOMO Notification Data and Configuration
+ */
 const fomoData = [
     "Andi, Palalawan, baru saja menghubungi kami untuk memesan sepeda listrik",
     "Lenny, Panam, Pekanbaru, baru saja memesan sepeda anak 16 inchi",
@@ -44,48 +104,47 @@ const fomoData = [
     "Mira, Perawang, tertarik dengan promo cuci gudang"
 ];
 
-const fomoNotification = document.getElementById('fomo-notification');
-const fomoMessage = document.getElementById('fomo-message');
-const notificationSound = document.getElementById('notificationSound');
+const elements = {
+    notification: document.getElementById('fomo-notification'),
+    message: document.getElementById('fomo-message'),
+    sound: document.getElementById('notificationSound')
+};
+
 let currentIndex = 0;
 
+/**
+ * Display FOMO notification with sound
+ */
 function showNotification() {
-    fomoMessage.textContent = fomoData[currentIndex];
-    fomoNotification.classList.remove('hidden');
+    if (!elements.notification || !elements.message) {
+        console.error('FOMO notification elements not found');
+        return;
+    }
+
+    elements.message.textContent = fomoData[currentIndex];
+    elements.notification.classList.remove('hidden');
     
-    try {
-        const sound = document.getElementById('notificationSound');
-        sound.volume = 0.3;
-        sound.currentTime = 0;
-        const playPromise = sound.play();
-        
-        if (playPromise !== undefined) {
-            playPromise.catch(error => {
-                console.log('Playback failed:', error);
+    // Play notification sound if enabled
+    if (soundEnabled && elements.sound) {
+        try {
+            elements.sound.currentTime = 0;
+            elements.sound.play().catch(error => {
+                console.error('Sound playback failed:', error);
             });
+        } catch (error) {
+            console.error('Sound play error:', error);
         }
-    } catch (e) {
-        console.log('Sound play failed:', e);
     }
     
     setTimeout(() => {
-        fomoNotification.classList.add('hidden');
-    }, 4000);
+        elements.notification.classList.add('hidden');
+    }, NOTIFICATION_DURATION);
 
     currentIndex = (currentIndex + 1) % fomoData.length;
 }
 
-// Initialize sound on first click
-document.addEventListener('click', function() {
-    const sound = document.getElementById('notificationSound');
-    sound.play().catch(function(error) {
-        console.log('Play failed:', error);
-    });
-    sound.pause();
-}, { once: true });
-
-// Start FOMO notifications
+// Start FOMO notifications with initial delay
 setTimeout(() => {
     showNotification();
-    setInterval(showNotification, 5000);
-}, 2000);
+    setInterval(showNotification, NOTIFICATION_INTERVAL);
+}, NOTIFICATION_INITIAL_DELAY);
