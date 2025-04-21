@@ -198,6 +198,11 @@ footer a:hover {
     background: #e64a19;
 }
 
+.cta-button.expired {
+    background-color: #888 !important;
+    cursor: not-allowed;
+}
+
 /* Map Section */
 #map {
     padding-bottom: 20px;

@@ -1,3 +1,4 @@
+// script.js
 // Constants
 const NOTIFICATION_DURATION = 4000;
 const NOTIFICATION_INTERVAL = 5000;
@@ -12,7 +13,11 @@ const ONE_SECOND = 1000;
 let soundEnabled = false;
 let soundInitialized = false;
 let currentIndex = 0;
-const endTime = new Date().getTime() + ONE_DAY;
+// At the top of the script, replace the endTime definition with:
+const endTime = localStorage.getItem('promoEndTime') || new Date().getTime() + ONE_DAY;
+if (!localStorage.getItem('promoEndTime')) {
+    localStorage.setItem('promoEndTime', endTime);
+}
 
 // DOM Elements
 const sound = document.getElementById('notificationSound');
@@ -51,8 +56,8 @@ function initializeSound() {
     // Check if audio file exists
     const audioSource = sound.querySelector('source');
     if (!audioSource || !audioSource.src) {
-        console.error('Audio source not found or invalid');
-        return;
+    console.error('Audio source not found or invalid');
+    return;
     }
     
     sound.load();
@@ -62,26 +67,26 @@ function initializeSound() {
     const playPromise = sound.play();
     
     if (playPromise !== undefined) {
-        playPromise.then(() => {
-            sound.pause();
-            sound.currentTime = 0;
-            soundEnabled = true;
-            soundInitialized = true;
-            console.log('Sound initialized successfully');
-        }).catch(error => {
-            console.error('Sound initialization failed:', error);
-            // Try alternative initialization for iOS
-            document.addEventListener('touchend', function iosSoundFix() {
-                sound.play().then(() => {
-                    sound.pause();
-                    sound.currentTime = 0;
-                    soundEnabled = true;
-                    soundInitialized = true;
-                    console.log('Sound initialized via iOS fix');
-                }).catch(e => console.error('iOS sound fix failed:', e));
-                document.removeEventListener('touchend', iosSoundFix);
-            }, { once: true });
-        });
+    playPromise.then(() => {
+    sound.pause();
+    sound.currentTime = 0;
+    soundEnabled = true;
+    soundInitialized = true;
+    console.log('Sound initialized successfully');
+    }).catch(error => {
+    console.error('Sound initialization failed:', error);
+    // Try alternative initialization for iOS
+    document.addEventListener('touchend', function iosSoundFix() {
+    sound.play().then(() => {
+    sound.pause();
+    sound.currentTime = 0;
+    soundEnabled = true;
+    soundInitialized = true;
+    console.log('Sound initialized via iOS fix');
+    }).catch(e => console.error('iOS sound fix failed:', e));
+    document.removeEventListener('touchend', iosSoundFix);
+    }, { once: true });
+    });
     }
 }
 
@@ -92,7 +97,39 @@ document.addEventListener('scroll', initializeSound, { once: true });
 
 // Countdown Timer
 function updateTimer() {
-    // ... existing code remains same
+    if (!timerElement) return;
+    
+    const now = new Date().getTime();
+    const timeRemaining = endTime - now;
+    
+    if (timeRemaining <= 0) {
+        // Timer has expired
+        clearInterval(timerInterval);
+        timerElement.textContent = "00:00:00";
+        
+        // Optional: Disable promo buttons or show "expired" message
+        const ctaButtons = document.querySelectorAll('.cta-button');
+        ctaButtons.forEach(button => {
+            button.classList.add('expired');
+            button.textContent = "PROMO TELAH BERAKHIR";
+            button.disabled = true;
+        });
+        
+        return;
+    }
+    
+    // Calculate hours, minutes, and seconds
+    const hours = Math.floor((timeRemaining % ONE_DAY) / ONE_HOUR);
+    const minutes = Math.floor((timeRemaining % ONE_HOUR) / ONE_MINUTE);
+    const seconds = Math.floor((timeRemaining % ONE_MINUTE) / ONE_SECOND);
+    
+    // Format with leading zeros
+    const formattedHours = hours.toString().padStart(2, '0');
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+    const formattedSeconds = seconds.toString().padStart(2, '0');
+    
+    // Update the timer display
+    timerElement.textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 }
 
 const timerInterval = setInterval(updateTimer, 1000);
@@ -107,29 +144,29 @@ function showNotification() {
     
     // Improved sound playing logic
     if (soundEnabled && sound) {
-        try {
-            // Reset sound position
-            sound.currentTime = 0;
-            
-            // Use promise-based approach for better compatibility
-            const playPromise = sound.play();
-            
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.error('Sound play failed:', error);
-                    // Try to re-initialize sound on failure
-                    if (!soundInitialized) {
-                        initializeSound();
-                    }
-                });
-            }
-        } catch (e) {
-            console.error('Sound play error:', e);
-        }
+    try {
+    // Reset sound position
+    sound.currentTime = 0;
+    
+    // Use promise-based approach for better compatibility
+    const playPromise = sound.play();
+    
+    if (playPromise !== undefined) {
+    playPromise.catch(error => {
+    console.error('Sound play failed:', error);
+    // Try to re-initialize sound on failure
+    if (!soundInitialized) {
+    initializeSound();
+    }
+    });
+    }
+    } catch (e) {
+    console.error('Sound play error:', e);
+    }
     }
     
     setTimeout(() => {
-        fomoNotification.classList.add('hidden');
+    fomoNotification.classList.add('hidden');
     }, NOTIFICATION_DURATION);
 
     currentIndex = (currentIndex + 1) % fomoData.length;
@@ -144,11 +181,11 @@ setTimeout(() => {
 // Add a manual sound test button for debugging (can be removed in production)
 window.testSound = function() {
     if (sound) {
-        sound.currentTime = 0;
-        sound.play().then(() => {
-            console.log('Sound test successful');
-        }).catch(e => {
-            console.error('Sound test failed:', e);
-        });
+    sound.currentTime = 0;
+    sound.play().then(() => {
+    console.log('Sound test successful');
+    }).catch(e => {
+    console.error('Sound test failed:', e);
+    });
     }
 };
