@@ -14,10 +14,8 @@ let soundEnabled = false;
 let soundInitialized = false;
 let currentIndex = 0;
 // At the top of the script, replace the endTime definition with:
-const endTime = localStorage.getItem('promoEndTime') || new Date().getTime() + ONE_DAY;
-if (!localStorage.getItem('promoEndTime')) {
-    localStorage.setItem('promoEndTime', endTime);
-}
+const endTime = new Date().getTime() + ONE_DAY;
+localStorage.setItem('promoEndTime', endTime);
 
 // DOM Elements
 const sound = document.getElementById('notificationSound');
